@@ -50,3 +50,5 @@ coverage.xml
 # Environment variables
 .env
 .env.local 
+nginx/certs/fullchain.pem
+nginx/certs/privkey.pem
