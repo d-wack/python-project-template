@@ -16,8 +16,12 @@ services:
     environment:
       - ENVIRONMENT=development
       - PYTHONPATH=/app
+      - WATCHFILES_FORCE_POLLING=true  # Enable file watching in Docker
     depends_on:
       - redis
+      - pgadmin
+      - prometheus
+      - grafana
     networks:
       - logging_network
     healthcheck:
@@ -26,6 +30,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    restart: unless-stopped  # Auto-restart on failure
 
   redis:
     image: redis:7.2-alpine
@@ -40,6 +45,63 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - logging_network
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    ports:
+      - "9091:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+    networks:
+      - logging_network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - logging_network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - logging_network
+    restart: unless-stopped
 
 networks:
   logging_network:
@@ -47,4 +109,7 @@ networks:
 
 volumes:
   redis_data:
+  prometheus_data:
+  grafana_data:
+  pgadmin_data:
   logs: 
