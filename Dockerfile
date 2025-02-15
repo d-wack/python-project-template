@@ -21,12 +21,20 @@ RUN apt-get update && \
     postgresql-client \
     curl \
     git \
+    build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir \
+    pytest \
+    pytest-asyncio \
+    pytest-cov \
+    pytest-mock \
+    asyncpg \
+    debugpy
 
 # Copy the project files
 COPY . .
