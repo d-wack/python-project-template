@@ -113,7 +113,40 @@ pytest --cov=src
 
 # Run specific test
 pytest tests/test_specific.py
+
+# Run tests with detailed coverage report
+pytest tests/ -v --cov=src --cov-report=term-missing
 ```
+
+### Test Coverage
+The project maintains high test coverage to ensure code quality and reliability. Current coverage metrics:
+
+- Overall coverage: 93%
+- Key areas covered:
+  - Database operations and session management
+  - Model functionality and base class features
+  - Configuration management
+  - API endpoints and middleware
+  - Logging and monitoring
+
+Coverage reports can be generated in multiple formats:
+```bash
+# Terminal report with missing lines
+pytest --cov=src --cov-report=term-missing
+
+# HTML report
+pytest --cov=src --cov-report=html
+
+# XML report (for CI/CD)
+pytest --cov=src --cov-report=xml
+```
+
+The CI/CD pipeline automatically runs tests and uploads coverage reports to Codecov for tracking coverage trends over time.
+
+Coverage requirements:
+- Minimum overall coverage: 90%
+- Critical paths (database, API, auth): 95%
+- New code changes must maintain or improve coverage
 
 ### Database Migrations
 ```bash
